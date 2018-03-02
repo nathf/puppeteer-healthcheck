@@ -2,12 +2,12 @@
 import log from './log';
 
 /*::
-type FoundAsset = {
+export type FoundAsset = {
   url: string,
   status: string
 }
 
-type FailedAsset = {
+export type FailedAsset = {
   url: string,
   error: string
 }
@@ -17,8 +17,11 @@ export default (
   regex /*: ?string */,
   requestedUrl /*: string */,
   foundAssets /*: Set<FoundAsset> */,
-  failedAssets /*: Set<FailedAsset> */
+  failedAssets /*: Set<FailedAsset> */,
+  loggerFn/*: (...args: any) => void */
 ) => {
+  const logger = log(loggerFn);
+
   return {
     requestfailed: (request /*: any */) => {
       const url = request.url();
@@ -29,8 +32,8 @@ export default (
         const response = request.response();
         const status = (response && response.status()) || 'Unknown';
 
-        log.error(`${status}: ${url}`);
-        log.error(`Reason: ${error}`);
+        logger.error(`${status}: ${url}`);
+        logger.error(`Reason: ${error}`);
 
         failedAssets.add({ url, error });
       }
@@ -38,18 +41,18 @@ export default (
     requestfinished: (request /*: any */) => {
       const url = request.url();
       if (url === requestedUrl) {
-        log.success(`Document loaded OK`);
+        logger.success(`Document loaded OK`);
       }
 
       if (request.url().match(regex)) {
         const response = request.response();
         const status = (response && response.status()) || 'Unknown';
 
-        log.success(`${status}: ${url}`);
+        logger.success(`${status}: ${url}`);
 
         foundAssets.add({ url, status });
       }
     },
-    error: () => log.error('Page crashed')
+    error: () => logger.error('Page crashed')
   };
 };

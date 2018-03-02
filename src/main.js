@@ -6,109 +6,107 @@ import log from './log';
 import assetChecks from './assetChecks';
 
 /*::
+import type { FoundAsset, FailedAsset } from './assetChecks';
 type Options = {
   uri: string,
   wait?: number,
   assetRegex?: ?string,
   assetCount?: number,
-  chromeExecutablePath?: ?string
+  chromeExecutablePath?: ?string,
+  logger: () => void
 }
 */
 
-function exit() {
-  log.error('Exiting...');
-  process.exit(1);
-}
-
-async function sleep(ms /*: number */) {
-  log.info(`Sleeping for ${ms}ms`);
+async function sleep(ms /*: number */, logger) {
+  logger.info(`Sleeping for ${ms}ms`);
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function run(opts /*: Options */) {
+async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedAsset>]>*/ {
+  const logger = log(opts.logger);
+
   if (opts.wait) {
-    await sleep(opts.wait);
+    await sleep(opts.wait, logger);
   }
 
-  const foundAssets = new Set();
-  const failedAssets = new Set();
-  let browser;
-  let page;
+  return new Promise(async (resolve, reject) => {
+    const foundAssets/*: Set<FoundAsset> */ = new Set();
+    const failedAssets/*: Set<FailedAsset> */ = new Set();
+    let browser;
+    let page;
 
-  let launchOpts = {}
-  if (opts.chromeExecutablePath) {
-    launchOpts = {
-      executablePath: opts.chromeExecutablePath
+    try {
+      browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+      page = await browser.newPage();
+    } catch (e) {
+      logger.error(`Error occursed while booting the browser: ${e.message}`);
+      return reject();
     }
-  }
 
-  try {
-    browser = await puppeteer.launch(launchOpts);
-    page = await browser.newPage();
-  } catch (e) {
-    log.error(`Error occursed while booting the browser: ${e.message}`);
-    return exit();
-  }
+    logger.info(`Requesting ${colors.yellow(opts.uri)}`);
 
-  log.info(`Requesting ${colors.yellow(opts.uri)}`);
+    if (opts.assetRegex) {
+      const resouceMatchRegex = new RegExp(opts.assetRegex, 'g');
 
-  if (opts.assetRegex) {
-    const resouceMatchRegex = new RegExp(opts.assetRegex, 'g');
+      logger.info(`Asset regex ${colors.yellow(resouceMatchRegex)}`);
 
-    log.info(`Asset regex ${colors.yellow(resouceMatchRegex)}`);
+      const checks = assetChecks(
+        opts.assetRegex,
+        opts.uri,
+        foundAssets,
+        failedAssets,
+        opts.logger
+      );
+      page.on('requestfailed', checks.requestfailed);
+      page.on('requestfinished', checks.requestfinished);
+      page.on('error', checks.error);
+    }
 
-    const checks = assetChecks(
-      opts.assetRegex,
-      opts.uri,
-      foundAssets,
-      failedAssets
-    );
-    page.on('requestfailed', checks.requestfailed);
-    page.on('requestfinished', checks.requestfinished);
-    page.on('error', checks.error);
-  }
+    try {
+      await page.goto(opts.uri);
+      logger.success('Page loaded OK');
+    } catch (e) {
+      logger.error(`Failed to load the page: ${colors.yellow(e.message)}`);
+      return reject();
+    }
 
-  try {
-    await page.goto(opts.uri);
-    log.success('Page loaded OK');
-  } catch (e) {
-    log.error(`Failed to load the page: ${colors.yellow(e.message)}`);
-    return exit();
-  }
+    try {
+      logger.info('Closing browser...');
+      await browser.close();
+    } catch (e) {
+      logger.error(`Error occured while closing the browser: ${e.message}`);
+      return reject();
+    }
 
-  try {
-    log.info('Closing browser...');
-    await browser.close();
-  } catch (e) {
-    log.error(`Error occured while closing the browser: ${e.message}`);
-    return exit();
-  }
-
-  if (opts.assetCount && foundAssets.size !== opts.assetCount) {
-    // TODO need to keep track of which assets didnt get matched.
-    log.error(
-      `Expected to find ${opts.assetCount || ''} asset(s), instead found ${
+    if (opts.assetCount && foundAssets.size !== opts.assetCount) {
+      // TODO need to keep track of which assets didnt get matched.
+      logger.error(
+        `Expected to find ${opts.assetCount || ''} asset(s), instead found ${
         foundAssets.size
-      }`
-    );
-    log.error('Assets that matched:');
-    foundAssets.forEach(asset => {
-      log.error(`  - ${asset.url}`);
-    });
+        }`
+      );
+      logger.error('Assets that matched:');
+      foundAssets.forEach(asset => {
+        logger.error(`  - ${asset.url}`);
+      });
 
-    return exit();
-  }
+      return reject([foundAssets, failedAssets]);
+    }
 
-  if (failedAssets.size) {
-    log.error('Some assets failed to load...');
-    failedAssets.forEach(asset => {
-      log.error(`\t- ${asset.url}`);
-    });
+    if (failedAssets.size) {
+      logger.error('Some assets failed to load...');
+      failedAssets.forEach(asset => {
+        logger.error(`\t- ${asset.url}`);
+      });
 
-    return exit();
-  }
+      return reject([foundAssets, failedAssets]);
+    }
 
-  log.success('Everything OK!');
+    logger.success('Everything OK!');
+    resolve([foundAssets, failedAssets]);
+  });
 }
 
 export default { run };

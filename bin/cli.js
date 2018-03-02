@@ -30,12 +30,4 @@ process.on('unhandledRejection', err => {
   throw err;
 });
 
-let opts = argv;
-if (process && process.env.CHROME_EXECUTABLE_PATH) {
-  opts = Object.assign({}, opts, {
-    chromeExecutablePath: process.env.CHROME_EXECUTABLE_PATH,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-}
-console.log({opts});
-cli.run(opts);
+cli.run(argv);

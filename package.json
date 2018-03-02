@@ -4,9 +4,10 @@
   "description": "",
   "main": "lib/puppeteer-healthcheck.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "microbundle watch -i ./src/main.js -o lib",
-    "build": "microbundle -i ./src/main.js -o lib"
+    "build": "microbundle -i ./src/main.js -o lib",
+    "test": "node ./test/tester.js",
+    "test:server": "node ./test/support/startServer.js",
+    "watch": "microbundle watch -i ./src/main.js -o lib"
   },
   "bin": {
     "puppeteer-healthcheck": "./bin/cli.js"
@@ -26,7 +27,11 @@
     "yargs": "^11.0.0"
   },
   "devDependencies": {
+    "ansi_up": "^2.0.2",
     "flow-bin": "^0.66.0",
-    "microbundle": "^0.4.4"
+    "glob": "7.1.2",
+    "micro": "^9.1.0",
+    "microbundle": "^0.4.4",
+    "mime": "^2.2.0"
   }
 }
