@@ -22,6 +22,6 @@ TODO
 
 
 ### TODOS
- - [ ] Docker
  - [ ] Write sample config
- - [ ] Setup local static server for testing
+ - [ ] Set up npm publishing
+ - [ ] Set up dockerhub publishing
