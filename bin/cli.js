@@ -4,24 +4,20 @@ const yargs = require('yargs');
 const cli = require('../lib/puppeteer-healthcheck');
 
 const argv = yargs
-  .usage('Usage: $0 --uri <uri-to-check>')
+  .usage('Usage: $0 --config <relative-path-to-config>')
+  .option('config', {
+    alias: 'c',
+    describe: 'Relative path to the healthcheck config file',
+    requiresArg: true
+  })
   .option('uri', {
     alias: 'u',
     describe: 'Valid URI to check',
     requiresArg: true
   })
-  .option('config', {
-    describe: 'Pass in a JavaScript file with all the config.',
-    requiresArg: true
-  })
   .option('assetRegex', {
     alias: 'r',
-    describe: 'Regex string to match asset URLs',
-    requiresArg: true
-  })
-  .option('assetCount', {
-    alias: 'c',
-    describe: 'The amount of assets you expect to be found',
+    describe: 'List of regex strings to match asset URLs',
     requiresArg: true
   })
   .option('wait', {

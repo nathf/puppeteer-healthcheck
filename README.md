@@ -34,11 +34,15 @@ puppeteer-healthcheck --config healthcheck.config.js
 
 #### `uri: string`
 
-The page you want to test.
+Valid URI to check
+
+#### `wait: number`
+
+Milliseconds to wait before requesting the URI
 
 #### `assetRegex: string[]`
 
-A list of regex strings to match assets on
+List of regex strings to match asset URLs
 
 e.g.
 
