@@ -40,7 +40,7 @@ jobs:
           command: docker build -t nathf/puppeteer-healthcheck:${CIRCLE_TAG:1} .
       - run:
           name: Docker Login
-          command: docker login -u $DOCKER_USER -p $DOCKER_PASS
+          command: docker login --username $DOCKER_USER --password $DOCKER_PASS
       - run:
           name: Docker Push
           command: docker push nathf/puppeteer-healthcheck:${CIRCLE_TAG:1}
