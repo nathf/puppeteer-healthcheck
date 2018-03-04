@@ -87,9 +87,20 @@ export const assetChecks = (
         const response = request.response();
         const status = (response && response.status()) || 'Unknown';
 
-        logger.success(`${status}: ${url}`);
-
-        foundAssets.add({ url, status });
+        // Log based on request status
+        if (status >= 200 && status < 300) {
+          // Success:
+          logger.success(`${status}: ${url}`);
+          foundAssets.add({ url, status });
+        } else if (status >= 300 && status < 400) {
+          // Warnings:
+          logger.warning(`${status}: ${url}`);
+          foundAssets.add({ url, status });
+        } else {
+          // Errors:
+          logger.error(`${status}: ${url}`);
+          failedAssets.add({ url, status });
+        }
       }
     },
     error: () => logger.error('Page crashed')

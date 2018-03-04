@@ -7,6 +7,9 @@ export default (caller/*: any */ = console.log) => ({
   success: (text/*: string */) => {
     caller(colors.bold(colors.green('✅'.padEnd(PAD))), colors.green(text))
   },
+  warning: (text/*: string */) => {
+    caller(colors.bold(colors.yellow('⚠️'.padEnd(PAD + 1))), colors.yellow(text))
+  },
   error: (text/*: string */) => {
     caller(colors.bold(colors.red('❌'.padEnd(PAD))), colors.red(text))
   },
