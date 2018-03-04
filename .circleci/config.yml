@@ -29,3 +29,57 @@ jobs:
           command: yarn test
       - store_artifacts:
           path: /home/pptruser/project/artifacts
+  container:
+    docker:
+      - image: docker:stable
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Build Container
+          command: docker build -t nathf/puppeteer-healthcheck:${CIRCLE_TAG:1}
+      - run:
+          name: Docker Login
+          command: docker login -u $DOCKER_USER -p $DOCKER_PASS
+      - run:
+          name: Docker Push
+          command: docker push nathf/puppeteer-healthcheck:${CIRCLE_TAG:1}
+  npm_publish:
+    docker:
+      - image: node:8.9.4-alpine
+    steps:
+      - checkout
+      - run:
+          name: Setup
+          command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+      - run:
+          name: Compile
+          command: yarn build
+      - run:
+          name: Publish
+          command: |
+            npm --no-git-tag-version version ${CIRCLE_TAG:1}
+            npm publish
+  release_gate:
+    docker:
+      - image: alpine
+    steps:
+      - run: "echo 'noop'"
+
+workflows:
+  version: 2
+  puppeteer_healthcheck:
+    jobs:
+      - build
+      - container:
+          requires:
+            - release_gate
+      - npm_publish:
+          requires:
+            - release_gate
+      - release_gate:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only: master
