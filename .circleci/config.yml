@@ -91,6 +91,16 @@ workflows:
       - docker_push:
           requires:
             - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v.*/
       - npm_publish:
           requires:
             - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v.*/
