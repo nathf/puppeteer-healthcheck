@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const colors = require('ansi-colors');
 
 import log from './log';
-import assetChecks from './assetChecks';
+import { assetChecks, printAssetRegexStats } from './assetChecks';
 import processScreenshots from './screenshot';
 
 /*::
@@ -12,7 +12,7 @@ import type { ScreenshotOpts } from './screenshot';
 type Options = {
   uri: string,
   wait?: number,
-  assetRegex?: ?string,
+  assetRegex?: ?string[],
   screenshots?: ScreenshotOpts[],
   logger?: () => void
 }
@@ -48,16 +48,15 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
 
     logger.info(`Requesting ${colors.yellow(opts.uri)}`);
 
+    const assetRegexStats = new Map();
+
     if (opts.assetRegex) {
-      const resouceMatchRegex = new RegExp(opts.assetRegex, 'g');
-
-      logger.info(`Asset regex ${colors.yellow(resouceMatchRegex)}`);
-
       const checks = assetChecks(
-        opts.assetRegex,
+        opts.assetRegex || [],
         opts.uri,
         foundAssets,
         failedAssets,
+        assetRegexStats,
         opts.logger
       );
       page.on('requestfailed', checks.requestfailed);
@@ -72,6 +71,8 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
       logger.error(`Failed to load the page: ${colors.yellow(e.message)}`);
       return reject();
     }
+
+    printAssetRegexStats(assetRegexStats, logger);
 
     if (opts.screenshots) {
       await processScreenshots(page, opts.screenshots, opts.logger);

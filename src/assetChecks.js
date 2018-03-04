@@ -1,4 +1,6 @@
 //@flow
+const colors = require('ansi-colors');
+
 import log from './log';
 
 /*::
@@ -13,20 +15,57 @@ export type FailedAsset = {
 }
 */
 
-export default (
-  regex /*: ?string */,
+const match = (subject/*: string */, regexSet/*: Set<RegExp>*/, regexStats/*: Map<RegExp, number>*/) => {
+  let matched = false;
+
+  // $FlowFixMe
+  const iterator = regexSet[Symbol.iterator]();
+
+  let current = iterator.next();
+  while (!current.done) {
+    const regex = current.value;
+    const result = subject.match(regex);
+
+    if (result) {
+      matched = !!result;
+      regexStats.set(regex, regexStats.get(regex) + 1);
+    }
+
+    current = iterator.next();
+  }
+
+  return matched;
+}
+
+export const assetChecks = (
+  regex /*: string[] */,
   requestedUrl /*: string */,
   foundAssets /*: Set<FoundAsset> */,
   failedAssets /*: Set<FailedAsset> */,
+  assetRegexStats /*: Map<RegExp, number>*/,
   loggerFn/*: ?() => void */
 ) => {
   const logger = log(loggerFn);
+
+  // If regex is not an array, convert it to one.
+  if (!Array.isArray(regex)) {
+    regex = [regex];
+  }
+
+  const regexSet = new Set(regex.map(r => {
+    const regexp = new RegExp(r, 'g');
+    assetRegexStats.set(regexp, 0)
+    return regexp;
+  }));
+
+  logger.info(`Asset regex`);
+  regexSet.forEach(v => logger.info(` - ${v.toString()}`));
 
   return {
     requestfailed: (request /*: any */) => {
       const url = request.url();
 
-      if (request.url().match(regex)) {
+      if (match(request.url(), regexSet, assetRegexStats)) {
         const failure = request.failure();
         const error = (failure && failure.errorText) || 'Unknown';
         const response = request.response();
@@ -44,7 +83,7 @@ export default (
         logger.success(`Document loaded OK`);
       }
 
-      if (request.url().match(regex)) {
+      if (match(request.url(), regexSet, assetRegexStats)) {
         const response = request.response();
         const status = (response && response.status()) || 'Unknown';
 
@@ -56,3 +95,11 @@ export default (
     error: () => logger.error('Page crashed')
   };
 };
+
+export const printAssetRegexStats = (stats/*: Map<RegExp, number> */, logger/*: any */) => {
+  stats.forEach((calls, regex) => {
+    if (!calls) {
+      logger.error(`${regex.toString()} didn't match any assets`);
+    }
+  });
+}

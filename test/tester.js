@@ -29,7 +29,7 @@ Expected:
 
 ${expected.join('\n')}
 
-to equal
+Actual:
 
 ${output.join('\n')}
 `);
@@ -73,7 +73,7 @@ async function run() {
     // processes requests. Order of logs isn't super important.
     // So we match expected logs exist in output and match length.
     const logExists = output.filter(o => expected.includes(o));
-    const result = logExists.length === expected.length;
+    const result = output.length === expected.length && logExists.length === expected.length;
 
     printResults(result, expected, output, fixture);
 
