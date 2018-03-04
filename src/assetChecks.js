@@ -18,7 +18,7 @@ export default (
   requestedUrl /*: string */,
   foundAssets /*: Set<FoundAsset> */,
   failedAssets /*: Set<FailedAsset> */,
-  loggerFn/*: (...args: any) => void */
+  loggerFn/*: ?() => void */
 ) => {
   const logger = log(loggerFn);
 

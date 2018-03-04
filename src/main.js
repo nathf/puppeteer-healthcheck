@@ -4,16 +4,17 @@ const colors = require('ansi-colors');
 
 import log from './log';
 import assetChecks from './assetChecks';
+import processScreenshots from './screenshot';
 
 /*::
 import type { FoundAsset, FailedAsset } from './assetChecks';
+import type { ScreenshotOpts } from './screenshot';
 type Options = {
   uri: string,
   wait?: number,
   assetRegex?: ?string,
-  assetCount?: number,
-  chromeExecutablePath?: ?string,
-  logger: () => void
+  screenshots?: ScreenshotOpts[],
+  logger?: () => void
 }
 */
 
@@ -72,27 +73,16 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
       return reject();
     }
 
+    if (opts.screenshots) {
+      await processScreenshots(page, opts.screenshots, opts.logger);
+    }
+
     try {
       logger.info('Closing browser...');
       await browser.close();
     } catch (e) {
       logger.error(`Error occured while closing the browser: ${e.message}`);
       return reject();
-    }
-
-    if (opts.assetCount && foundAssets.size !== opts.assetCount) {
-      // TODO need to keep track of which assets didnt get matched.
-      logger.error(
-        `Expected to find ${opts.assetCount || ''} asset(s), instead found ${
-        foundAssets.size
-        }`
-      );
-      logger.error('Assets that matched:');
-      foundAssets.forEach(asset => {
-        logger.error(`  - ${asset.url}`);
-      });
-
-      return reject([foundAssets, failedAssets]);
     }
 
     if (failedAssets.size) {

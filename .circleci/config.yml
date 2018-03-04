@@ -3,8 +3,13 @@ jobs:
   build:
     docker:
       - image: alekzonder/puppeteer:1.1.1
+    environment:
+      - ARTIFACT_PATH: /home/pptruser/project/artifacts
     steps:
       - checkout
+      - run:
+          name: Create artifacts directory
+          command: mkdir -p /home/pptruser/project/artifacts
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "yarn.lock" }}
@@ -22,3 +27,5 @@ jobs:
       - run: 
           name: Tests
           command: yarn test
+      - store_artifacts:
+          path: /home/pptruser/project/artifacts

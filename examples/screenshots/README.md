@@ -1,0 +1,1 @@
+`puppeteer-healthcheck --config healthcheck.config.js`

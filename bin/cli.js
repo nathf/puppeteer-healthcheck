@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const path = require('path');
 const yargs = require('yargs');
 const cli = require('../lib/puppeteer-healthcheck');
 
@@ -7,6 +8,10 @@ const argv = yargs
   .option('uri', {
     alias: 'u',
     describe: 'Valid URI to check',
+    requiresArg: true
+  })
+  .option('config', {
+    describe: 'Pass in a JavaScript file with all the config.',
     requiresArg: true
   })
   .option('assetRegex', {
@@ -23,11 +28,15 @@ const argv = yargs
     alias: 'w',
     describe: 'Milliseconds to wait before requesting the URI',
     requiresArg: true
-  })
-  .demandOption(['uri']).argv;
+  }).argv;
 
 process.on('unhandledRejection', err => {
   throw err;
 });
 
-cli.run(argv);
+let config = argv;
+if (argv.config) {
+  config = require(path.resolve(process.cwd(), argv.config));
+}
+
+cli.run(config);
