@@ -37,7 +37,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Build Container
-          command: docker build -t nathf/puppeteer-healthcheck:${CIRCLE_TAG:1}
+          command: docker build -t nathf/puppeteer-healthcheck:${CIRCLE_TAG:1} .
       - run:
           name: Docker Login
           command: docker login -u $DOCKER_USER -p $DOCKER_PASS
@@ -52,6 +52,17 @@ jobs:
       - run:
           name: Setup
           command: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "yarn.lock" }}
+          - v1-dependencies-
+      - run:
+          name: Install
+          command: yarn
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
       - run:
           name: Compile
           command: yarn build
@@ -83,5 +94,3 @@ workflows:
           filters:
             tags:
               only: /^v.*/
-            branches:
-              only: master
