@@ -70,7 +70,7 @@ jobs:
           name: Publish
           command: |
             npm --no-git-tag-version version ${CIRCLE_TAG:1}
-            npm publish
+            npm publish --access public
   release_gate:
     docker:
       - image: alpine
@@ -89,8 +89,8 @@ workflows:
           requires:
             - release_gate
       - release_gate:
-          requires:
-            - build
           filters:
             tags:
               only: /^v.*/
+          requires:
+            - build
