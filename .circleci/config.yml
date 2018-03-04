@@ -78,6 +78,8 @@ workflows:
           requires:
             - release_gate
       - release_gate:
+          requires:
+            - build
           filters:
             tags:
               only: /^v.*/
