@@ -3,7 +3,7 @@
 ![Docker Build Status](https://img.shields.io/docker/build/nathf/puppeteer-healthcheck.svg)
 
 # Puppeteer Healthcheck
-Puppeteer Healthcheck is a simple tool wrapped over [puppeteer](https://github.com/GoogleChrome/puppeteer) to check page and critical asset status', as well as checks for key dom elements.
+Puppeteer Healthcheck is a tool wrapped over [puppeteer](https://github.com/GoogleChrome/puppeteer) to check page and critical asset status'.
 
 ## The Problem
 Often post deploy we want to check our site/app has been deployed sucessfully. We would want to ensure the web server is responding, critical assets and certain DOM elements exists post deploy.

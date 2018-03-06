@@ -35,4 +35,4 @@ if (argv.config) {
   config = require(path.resolve(process.cwd(), argv.config));
 }
 
-cli.run(config);
+cli.run(config).catch(() => process.exit(1));

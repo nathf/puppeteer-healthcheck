@@ -1,14 +1,8 @@
 {
   "name": "@nathf/puppeteer-healthcheck",
   "version": "0.0.1",
-  "description": "",
+  "description": "Puppeteer Healthcheck is a simple tool wrapped over puppeteer to check page and critical asset status'.",
   "main": "lib/puppeteer-healthcheck.js",
-  "scripts": {
-    "build": "microbundle -i ./src/main.js -o lib",
-    "test": "node ./test/tester.js",
-    "test:server": "node ./test/support/startServer.js",
-    "watch": "microbundle watch -i ./src/main.js -o lib"
-  },
   "bin": {
     "puppeteer-healthcheck": "./bin/cli.js"
   },
@@ -17,9 +11,33 @@
     "lib/puppeteer-healthcheck.js",
     "lib/puppeteer-healthcheck.js.map"
   ],
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "puppeteer",
+    "healthcheck",
+    "cli",
+    "docker"
+  ],
+  "author": {
+    "name": "Nathan Flew",
+    "email": "nath@nathf.com"
+  },
+  "engines": {
+    "node": ">=8.9.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:nathf/puppeteer-healthcheck.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nathf/puppeteer-healthcheck/issues"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "microbundle -i ./src/main.js -o lib",
+    "test": "node ./test/tester.js",
+    "test:server": "node ./test/support/startServer.js",
+    "watch": "microbundle watch -i ./src/main.js -o lib"
+  },
   "dependencies": {
     "ansi-colors": "^1.1.0",
     "puppeteer": "^1.1.1",
