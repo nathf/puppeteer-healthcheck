@@ -58,8 +58,10 @@ export const assetChecks = (
     return regexp;
   }));
 
-  logger.info(`Asset regex`);
-  regexSet.forEach(v => logger.info(` - ${v.toString()}`));
+  if (regex.length !== 0) {
+    logger.info(`Asset regex`);
+    regexSet.forEach(v => logger.info(` - ${v.toString()}`));
+  }
 
   return {
     requestfailed: (request /*: any */) => {
