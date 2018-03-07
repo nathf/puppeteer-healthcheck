@@ -103,3 +103,14 @@ export const printAssetRegexStats = (stats/*: Map<RegExp, number> */, logger/*: 
     }
   });
 }
+
+export const isFailedAsset = (url, failedAssets) => {
+  let result = false;
+  failedAssets.forEach(asset => {
+    if (asset.url === url) {
+      result = true;
+    }
+  });
+  return result;
+}
+

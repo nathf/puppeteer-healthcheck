@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const colors = require('ansi-colors');
 
 import log from './log';
-import { assetChecks, printAssetRegexStats } from './assetChecks';
+import { assetChecks, printAssetRegexStats, isFailedAsset } from './assetChecks';
 import processScreenshots from './screenshot';
 
 /*::
