@@ -2,7 +2,7 @@
 const puppeteer = require('puppeteer');
 const colors = require('ansi-colors');
 
-import log from './log';
+import logger from './log';
 import { assetChecks, printAssetRegexStats } from './assetChecks';
 import processScreenshots from './screenshot';
 
@@ -13,8 +13,7 @@ type Options = {
   uri: string,
   wait?: number,
   assetRegex?: ?string[],
-  screenshots?: ScreenshotOpts[],
-  logger?: () => void
+  screenshots?: ScreenshotOpts[]
 }
 */
 
@@ -24,8 +23,6 @@ async function sleep(ms /*: number */, logger) {
 }
 
 async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedAsset>]>*/ {
-  const logger = log(opts.logger);
-
   if (opts.wait) {
     await sleep(opts.wait, logger);
   }
@@ -56,8 +53,7 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
         opts.uri,
         foundAssets,
         failedAssets,
-        assetRegexStats,
-        opts.logger
+        assetRegexStats
       );
       page.on('requestfailed', checks.requestfailed);
       page.on('requestfinished', checks.requestfinished);
@@ -75,7 +71,7 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
     printAssetRegexStats(assetRegexStats, logger);
 
     if (opts.screenshots) {
-      await processScreenshots(page, opts.screenshots, opts.logger);
+      await processScreenshots(page, opts.screenshots);
     }
 
     try {

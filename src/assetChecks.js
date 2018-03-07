@@ -1,7 +1,7 @@
 //@flow
 const colors = require('ansi-colors');
 
-import log from './log';
+import logger from './log';
 
 /*::
 export type FoundAsset = {
@@ -42,10 +42,8 @@ export const assetChecks = (
   requestedUrl /*: string */,
   foundAssets /*: Set<FoundAsset> */,
   failedAssets /*: Set<FailedAsset> */,
-  assetRegexStats /*: Map<RegExp, number>*/,
-  loggerFn/*: ?() => void */
+  assetRegexStats /*: Map<RegExp, number>*/
 ) => {
-  const logger = log(loggerFn);
 
   // If regex is not an array, convert it to one.
   if (!Array.isArray(regex)) {
@@ -85,7 +83,7 @@ export const assetChecks = (
 
       if (match(request.url(), regexSet, assetRegexStats)) {
         const response = request.response();
-        const status = (response && response.status()) || 'Unknown';
+        const status = (response && response.status());
 
         // Log based on request status
         if (status >= 200 && status < 300) {
@@ -99,7 +97,7 @@ export const assetChecks = (
         } else {
           // Errors:
           logger.error(`${status}: ${url}`);
-          failedAssets.add({ url, status });
+          failedAssets.add({ url, error: `Status: ${status}. Unknown error` });
         }
       }
     },

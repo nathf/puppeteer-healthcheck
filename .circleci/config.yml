@@ -22,11 +22,17 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "yarn.lock" }}
       - run:
+          name: Flow
+          command: yarn flow check
+      - run:
           name: Compile
           command: yarn build
       - run: 
           name: Tests
           command: yarn test
+      - run:
+          name: Upload Coverage
+          command: bash <(curl -s https://codecov.io/bash)
       - store_artifacts:
           path: /home/pptruser/project/artifacts
   docker_push:

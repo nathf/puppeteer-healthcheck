@@ -1,6 +1,6 @@
 //@flow
 
-import log from './log';
+import logger from './log';
 
 /*::
 type Clip = {
@@ -25,7 +25,6 @@ export type ScreenshotOpts = {
 */
 
 const processScreenshots = async (page/*: any */, screenshotOpts/*: ScreenshotOpts[] */, loggerFn/*: ?() => void */)/*: Promise<*> */ => {
-  const logger = log(loggerFn);
   const screenshotSet = new Set(screenshotOpts);
 
   // $FlowFixMe
