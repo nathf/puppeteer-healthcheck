@@ -79,11 +79,18 @@ export const assetChecks = (
     },
     requestfinished: (request /*: any */) => {
       const url = request.url();
-      if (url === requestedUrl) {
-        logger.success(`Document loaded OK`);
+      const response = request.response();
+      const status = (response && response.status()) || 'Unknown';
+
+      if (url === requestedUrl && status < 300) {
+        logger.success(`Requested URL loaded OK`);
+      } else if (url === requestedUrl && status >= 400) {
+        logger.error(`${status}: ${url}`);
+        failedAssets.add({ url, status });
+        return false;
       }
 
-      if (match(request.url(), regexSet, assetRegexStats)) {
+      if (match(url, regexSet, assetRegexStats)) {
         const response = request.response();
         const status = (response && response.status()) || 'Unknown';
 
