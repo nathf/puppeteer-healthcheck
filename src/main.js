@@ -25,6 +25,9 @@ async function sleep(ms /*: number */, logger) {
 
 async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedAsset>]>*/ {
   const logger = log(opts.logger);
+  // Add leading slash to uri if missing
+  const uri = (opts.uri || '').replace(/\/?$/, '/');
+
 
   if (opts.wait) {
     await sleep(opts.wait, logger);
@@ -46,33 +49,32 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
       return reject();
     }
 
-    logger.info(`Requesting ${colors.yellow(opts.uri)}`);
+    logger.info(`Requesting ${colors.yellow(uri)}`);
 
     const assetRegexStats = new Map();
 
-    if (opts.assetRegex) {
-      const checks = assetChecks(
-        opts.assetRegex || [],
-        opts.uri,
-        foundAssets,
-        failedAssets,
-        assetRegexStats,
-        opts.logger
-      );
-      page.on('requestfailed', checks.requestfailed);
-      page.on('requestfinished', checks.requestfinished);
-      page.on('error', checks.error);
-    }
+    const checks = assetChecks(
+      opts.assetRegex || [],
+      uri,
+      foundAssets,
+      failedAssets,
+      assetRegexStats,
+      opts.logger
+    );
+    page.on('requestfailed', checks.requestfailed);
+    page.on('requestfinished', checks.requestfinished);
+    page.on('error', checks.error);
 
     try {
-      await page.goto(opts.uri);
-      logger.success('Page loaded OK');
+      await page.goto(uri);
     } catch (e) {
       logger.error(`Failed to load the page: ${colors.yellow(e.message)}`);
       return reject();
     }
 
-    printAssetRegexStats(assetRegexStats, logger);
+    if (!isFailedAsset(uri, failedAssets)) {
+      printAssetRegexStats(assetRegexStats, logger);
+    }
 
     if (opts.screenshots) {
       await processScreenshots(page, opts.screenshots, opts.logger);
@@ -95,7 +97,6 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
       return reject([foundAssets, failedAssets]);
     }
 
-    logger.success('Everything OK!');
     resolve([foundAssets, failedAssets]);
   });
 }
