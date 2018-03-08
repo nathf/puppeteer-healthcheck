@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const colors = require('ansi-colors');
 
 import logger from './log';
-import { assetChecks, printAssetRegexStats } from './assetChecks';
+import { assetChecks, printAssetRegexStats, cleanUrl, isValidUrl } from './assetChecks';
 import processScreenshots from './screenshot';
 
 /*::
@@ -23,15 +23,23 @@ async function sleep(ms /*: number */, logger) {
 }
 
 async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedAsset>]>*/ {
-  if (opts.wait) {
-    await sleep(opts.wait, logger);
-  }
 
   return new Promise(async (resolve, reject) => {
     const foundAssets/*: Set<FoundAsset> */ = new Set();
     const failedAssets/*: Set<FailedAsset> */ = new Set();
     let browser;
     let page;
+
+    // Check if uri argument was set and that its a valid url after cleaning
+    const uri = cleanUrl(opts.uri);
+    if (typeof opts.uri === 'undefined' || !isValidUrl(uri)) {
+      logger.error(`Invalid URI. Please check your configuration.`);
+      return reject();
+    }
+
+    if (opts.wait) {
+      await sleep(opts.wait, logger);
+    }
 
     try {
       browser = await puppeteer.launch({
@@ -43,14 +51,14 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
       return reject();
     }
 
-    logger.info(`Requesting ${colors.yellow(opts.uri)}`);
+    logger.info(`Requesting ${colors.yellow(uri)}`);
 
     const assetRegexStats = new Map();
 
     if (opts.assetRegex) {
       const checks = assetChecks(
         opts.assetRegex || [],
-        opts.uri,
+        uri,
         foundAssets,
         failedAssets,
         assetRegexStats
@@ -61,7 +69,7 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
     }
 
     try {
-      await page.goto(opts.uri);
+      await page.goto(uri);
       logger.success('Page loaded OK');
     } catch (e) {
       logger.error(`Failed to load the page: ${colors.yellow(e.message)}`);

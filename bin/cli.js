@@ -24,7 +24,8 @@ const argv = yargs
     alias: 'w',
     describe: 'Milliseconds to wait before requesting the URI',
     requiresArg: true
-  }).argv;
+  })
+  .argv;
 
 process.on('unhandledRejection', err => {
   throw err;

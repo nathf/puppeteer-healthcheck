@@ -1,5 +1,6 @@
 //@flow
 const colors = require('ansi-colors');
+const { URL } = require('url');
 
 import logger from './log';
 
@@ -111,4 +112,20 @@ export const printAssetRegexStats = (stats/*: Map<RegExp, number> */, logger/*: 
       logger.error(`${regex.toString()} didn't match any assets`);
     }
   });
+}
+
+export const isValidUrl = (url/*: string */) => {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export const cleanUrl = (url/*: string */) => {
+  if (!/^https?:\/\//i.test(url)) {
+    url = 'https://' + url;
+  }
+  return url;
 }
