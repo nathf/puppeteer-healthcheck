@@ -14,21 +14,21 @@ Node requirements:
 - v8.9.4
 
 NPM
-```
+```bash
 yarn add global @nathf/puppeteer-healthcheck
 # or if you prefer NPM
 npm i -g @nathf/puppeteer-healthcheck
 ```
 
 Docker
-```
+```bash
 docker pull nathf/puppeteer-healthcheck
 ```
 
 ## Config
 
 Example command with config
-```
+```bash
 puppeteer-healthcheck --config healthcheck.config.js
 ```
 
@@ -59,10 +59,62 @@ assetRegex: [
 
 A screenshot object consists of:
 
-[List of full options for screenshots](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagescreenshotoptions)
+[These options are referenced from the official Puppeteer Docs](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagescreenshotoptions)
 
 * `path: string`: absolute path to save the screenshot
-* `fullPage: boolean`:  takes a screenshot of the full scrollable page
-* `viewport` [Puppeteer reference](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagesetviewportviewport)
+* `type: string`: Specify screenshot type, can be either `jpeg` or `png`. Defaults to 'png'.
+* `quality: number`: The quality of the image, between 0-100. Not applicable to png images.
+* `fullPage: boolean`: When true, takes a screenshot of the full scrollable page. Defaults to `false`.
+* `clip: Object`: An object which specifies clipping region of the page. Should have the following fields:
+  * `x: number`: x-coordinate of top-left corner of clip area
+  * `y: number`: y-coordinate of top-left corner of clip area
+  * `width: number`: width of clipping area
+  * `height: number`: height of clipping area
+* `omitBackground: boolean`: Hides default white background and allows capturing screenshots with transparency. Defaults to false.
+* `viewport: Object` [Referenced from Puppeteer docs](https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#pagesetviewportviewport)
+  * `width: number`: page width in pixels.
+  * `height: number` page height in pixels.
+  * `deviceScaleFactor: numer`: Specify device scale factor (can be thought of as dpr). Defaults to `1`.
+  * `isMobile: boolean`: Whether the `meta` viewport tag is taken into account. Defaults to `false`.
+  * `hasTouch: boolean`: Specifies if viewport supports touch events. Defaults to `false`
+  * `isLandscape: boolean`: Specifies if viewport is in landscape mode. Defaults to `false`.
 
- 
+
+### Sample config
+
+A sample config checking the GitHub login page, checking their hashed css and js and taking screenshots at various sizes.
+
+```js
+// healthcheck.config.js
+module.exports = {
+  uri: 'https://github.com/login',
+  assetRegex: [
+    'github-(.+)\.js',
+    'github-(.+)\.css',
+  ],
+  screenshots: [
+    {
+      path: `${__dirname}/desktop.png`,
+      viewport: {
+        width: 800,
+        height: 300
+      }
+    },
+    {
+      path: `${__dirname}/fullpage.png`,
+      fullPage: true
+    },
+    {
+      path: `${__dirname}/narrow.png`,
+      viewport: {
+        width: 375,
+        height: 667
+      }
+    }
+  ]
+}
+```
+
+Results in the following output:
+
+<img src="https://user-images.githubusercontent.com/646098/37132139-4c560692-22e0-11e8-9535-12716394fe4d.png" />

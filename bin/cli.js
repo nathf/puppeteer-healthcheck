@@ -25,6 +25,13 @@ const argv = yargs
     describe: 'Milliseconds to wait before requesting the URI',
     requiresArg: true
   })
+  .check(argv => {
+    if (argv.uri || argv.config) {
+      return true;
+    }
+
+    throw new Error('You must provide either a URI or a config file to perform a healthcheck.');
+  })
   .argv;
 
 process.on('unhandledRejection', err => {
