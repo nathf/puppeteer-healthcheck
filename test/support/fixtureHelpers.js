@@ -8,8 +8,8 @@ const getRoute = fixture => {
   return `http://localhost:${port}/fixtures/${fixture}`;
 }
 
-const getConfig = fixture => {
-  return require(`../fixtures/${fixture}/config`);
+const getConfig = (fixture, name = 'config') => {
+  return require(`../fixtures/${fixture}/${name}`);
 }
 
 const getSpyResults = spy => {

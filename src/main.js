@@ -3,17 +3,20 @@ const puppeteer = require('puppeteer');
 const colors = require('ansi-colors');
 
 import logger from './log';
+import authentication from './authentication';
 import { assetChecks, printAssetRegexStats, cleanUrl, isValidUrl } from './assetChecks';
 import processScreenshots from './screenshot';
 
 /*::
 import type { FoundAsset, FailedAsset } from './assetChecks';
 import type { ScreenshotOpts } from './screenshot';
-type Options = {
+import type { Authentication } from './authentication';
+export type Options = {
   uri: string,
   wait?: number,
   assetRegex?: ?string[],
-  screenshots?: ScreenshotOpts[]
+  screenshots?: ScreenshotOpts[],
+  authentication: Authentication
 }
 */
 
@@ -66,6 +69,13 @@ async function run(opts /*: Options */)/*: Promise<[Set<FoundAsset>, Set<FailedA
       page.on('requestfailed', checks.requestfailed);
       page.on('requestfinished', checks.requestfinished);
       page.on('error', checks.error);
+    }
+
+    try {
+      await authentication(page, opts);
+    } catch(e) {
+      logger.error(`Failed to authenticate: ${colors.yellow(e.message)}`);
+      return reject();
     }
 
     try {
