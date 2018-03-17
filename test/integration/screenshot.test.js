@@ -1,29 +1,25 @@
 import healthcheck from '../../src/main';
-import { getFixtureDetails, getSpyResults, port } from '../support/fixtureHelpers';
+import { getFixtureConfig, getFixtureDetails } from '../support/fixture.helpers';
 
 test('Integration - Can grab screenshots of requested page', async () => {
   const spy = jest.spyOn(console, 'log');
   
-  const { config, route, dir } = getFixtureDetails('screenshot');
-
-  const opts = Object.assign({}, config, {
-    uri: route
-  });
+  const { dir } = getFixtureDetails('screenshot');
 
   try {
-    await healthcheck.run(opts);
+    await healthcheck.run(getFixtureConfig('screenshot'));
   } catch(e) {}
 
   const basepath = process.env.ARTIFACT_PATH || dir;
 
-  expect(getSpyResults(spy)).toRoughlyMatchArray([
-    `ℹ️   Requesting http://localhost:${port}/fixtures/screenshot`,
+  expect(spy).toRoughlyMatchArray([
+    'ℹ️   Requesting http://localhost:PORT/fixtures/screenshot',
     'ℹ️   Asset regex',
     'ℹ️    - /hash-(.+).js/g',
     'ℹ️    - /hash-(.+).css/g',
     '✅   Document loaded OK',
-    `✅   200: http://localhost:${port}/fixtures/screenshot/assets/hash-f78ghaw7.css`,
-    `✅   200: http://localhost:${port}/fixtures/screenshot/assets/hash-h7sadwaj.js`,
+    '✅   200: http://localhost:PORT/fixtures/screenshot/assets/hash-f78ghaw7.css',
+    '✅   200: http://localhost:PORT/fixtures/screenshot/assets/hash-h7sadwaj.js',
     '✅   Page loaded OK',
     'ℹ️   Setting viewport {"width":800,"height":300}',
     `✅   ${basepath}/desktop.png`,

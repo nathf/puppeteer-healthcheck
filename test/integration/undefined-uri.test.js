@@ -1,16 +1,14 @@
 import healthcheck from '../../src/main';
-import { getFixtureDetails, getSpyResults } from '../support/fixtureHelpers';
+import { getConfig } from '../support/fixture.helpers';
 
 test('Integration - Requesting an invalid URI', async () => {
   const spy = jest.spyOn(console, 'log');
 
-  const { config } = getFixtureDetails('undefined-uri');
-
   try {
-    await healthcheck.run(config);
+    await healthcheck.run(getConfig('undefined-uri'));
   } catch(e) {}
 
-  expect(getSpyResults(spy)).toRoughlyMatchArray([
+  expect(spy).toRoughlyMatchArray([
     '❌   Invalid URI. Please check your configuration.'
    ]);
 

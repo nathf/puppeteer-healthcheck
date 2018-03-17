@@ -12,15 +12,15 @@ const getConfig = (fixture, name = 'config') => {
   return require(`../fixtures/${fixture}/${name}`);
 }
 
-const getSpyResults = spy => {
-  return spy.mock.calls.reduce((acc, current) => {
-    const log = ansi.ansi_to_text(current.join(' '));
-    return acc.concat(log);
-  }, []);
-}
-
 const getFixtureDir = fixture => {
   return path.resolve(__dirname, `../fixtures/${fixture}`);
+}
+
+const getFixtureConfig = fixture => {
+  return {
+    ...getConfig(fixture),
+    uri: getRoute(fixture)
+  }
 }
 
 const getFixtureDetails = fixture => {
@@ -34,8 +34,8 @@ const getFixtureDetails = fixture => {
 export {
   port,
   getFixtureDetails,
+  getFixtureConfig,
   getRoute,
   getConfig,
-  getSpyResults,
   getFixtureDir
 }
