@@ -43,13 +43,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Build Container
-          command: docker build -t nathf/puppeteer-healthcheck:${CIRCLE_TAG:1} .
-      - run:
-          name: Docker Login
-          command: docker login --username $DOCKER_USER --password $DOCKER_PASS
-      - run:
-          name: Docker Push
-          command: docker push nathf/puppeteer-healthcheck:${CIRCLE_TAG:1}
+          command: ./.circleci/docker-build.sh
   npm_publish:
     docker:
       - image: node:8.9.4-alpine
